@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: Metero
+    id: options_0
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -28,7 +28,7 @@ options:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 8]
+    coordinate: [1776, 616.0]
     rotation: 0
     state: enabled
 
@@ -60,6 +60,82 @@ blocks:
     coordinate: [184, 12]
     rotation: 0
     state: enabled
+- name: thresh
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: Thresh
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-10'
+    step: '1'
+    stop: '50'
+    value: '1'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1312, 516.0]
+    rotation: 0
+    state: true
+- name: thresh2
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: Low
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-100'
+    step: '1'
+    stop: '0'
+    value: '-0.1'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1536, 536.0]
+    rotation: 0
+    state: true
+- name: analog_wfm_rcv_0
+  id: analog_wfm_rcv
+  parameters:
+    affinity: ''
+    alias: ''
+    audio_decimation: '1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quad_rate: '500000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1392, 260.0]
+    rotation: 0
+    state: true
+- name: audio_sink_0
+  id: audio_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: ''
+    num_inputs: '1'
+    ok_to_block: 'True'
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2064, 332.0]
+    rotation: 0
+    state: true
 - name: blocks_burst_tagger_0
   id: blocks_burst_tagger
   parameters:
@@ -94,24 +170,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1184, 420.0]
-    rotation: 0
-    state: true
-- name: blocks_file_sink_0
-  id: blocks_file_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    append: 'True'
-    comment: ''
-    file: C:\Users\HP\Documents\observations\Observation.dat
-    type: complex
-    unbuffered: 'False'
-    vlen: '1024'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1824, 84.0]
     rotation: 0
     state: true
 - name: blocks_float_to_short_0
@@ -157,7 +215,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    num_items: '1024'
+    num_items: '1'
     type: complex
     vlen: '1'
   states:
@@ -167,15 +225,31 @@ blocks:
     coordinate: [1216, 128.0]
     rotation: 0
     state: true
+- name: blocks_tagged_file_sink_0
+  id: blocks_tagged_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    samp_rate: samp_rate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1472, 92.0]
+    rotation: 0
+    state: true
 - name: blocks_threshold_ff_0
   id: blocks_threshold_ff
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    high: '100'
+    high: thresh
     init: '0'
-    low: '-100'
+    low: -thresh2
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
@@ -201,27 +275,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1440, 432.0]
-    rotation: 0
-    state: true
-- name: fft_vxx_0
-  id: fft_vxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    fft_size: '1024'
-    forward: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    nthreads: '1'
-    shift: 'True'
-    type: complex
-    window: window.blackmanharris(1024)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1480, 76.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -318,6 +371,89 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [344, 204.0]
+    rotation: 0
+    state: true
+- name: qtgui_number_sink_0
+  id: qtgui_number_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    autoscale: 'False'
+    avg: '0'
+    color1: ("black", "black")
+    color10: ("black", "black")
+    color2: ("black", "black")
+    color3: ("black", "black")
+    color4: ("black", "black")
+    color5: ("black", "black")
+    color6: ("black", "black")
+    color7: ("black", "black")
+    color8: ("black", "black")
+    color9: ("black", "black")
+    comment: ''
+    factor1: '1'
+    factor10: '1'
+    factor2: '1'
+    factor3: '1'
+    factor4: '1'
+    factor5: '1'
+    factor6: '1'
+    factor7: '1'
+    factor8: '1'
+    factor9: '1'
+    graph_type: qtgui.NUM_GRAPH_HORIZ
+    gui_hint: ''
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    max: '1'
+    min: '-1'
+    name: '""'
+    nconnections: '1'
+    type: float
+    unit1: ''
+    unit10: ''
+    unit2: ''
+    unit3: ''
+    unit4: ''
+    unit5: ''
+    unit6: ''
+    unit7: ''
+    unit8: ''
+    unit9: ''
+    update_time: '0.10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1912, 460.0]
+    rotation: 0
+    state: true
+- name: rational_resampler_xxx_0
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: '500'
+    fbw: '0'
+    interp: '32'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1768, 204.0]
     rotation: 0
     state: true
 - name: rtlsdr_source_0
@@ -679,14 +815,17 @@ blocks:
     state: true
 
 connections:
+- [analog_wfm_rcv_0, '0', rational_resampler_xxx_0, '0']
+- [blocks_burst_tagger_0, '0', analog_wfm_rcv_0, '0']
 - [blocks_burst_tagger_0, '0', blocks_stream_to_vector_0_0, '0']
 - [blocks_complex_to_mag_squared_0_0, '0', blocks_vector_to_stream_0, '0']
 - [blocks_float_to_short_0, '0', blocks_burst_tagger_0, '1']
 - [blocks_stream_to_vector_0, '0', blocks_complex_to_mag_squared_0_0, '0']
-- [blocks_stream_to_vector_0_0, '0', fft_vxx_0, '0']
+- [blocks_stream_to_vector_0_0, '0', blocks_tagged_file_sink_0, '0']
 - [blocks_threshold_ff_0, '0', blocks_float_to_short_0, '0']
+- [blocks_threshold_ff_0, '0', qtgui_number_sink_0, '0']
 - [blocks_vector_to_stream_0, '0', blocks_threshold_ff_0, '0']
-- [fft_vxx_0, '0', blocks_file_sink_0, '0']
+- [rational_resampler_xxx_0, '0', audio_sink_0, '0']
 - [rtlsdr_source_0, '0', blocks_burst_tagger_0, '0']
 - [rtlsdr_source_0, '0', blocks_stream_to_vector_0, '0']
 - [rtlsdr_source_0, '0', qtgui_freq_sink_x_0, '0']

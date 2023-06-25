@@ -25,14 +25,19 @@ from gnuradio import eng_notation
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
+from gnuradio import analog
+from gnuradio import audio
 from gnuradio import blocks
 from gnuradio import fft
 from gnuradio.fft import window
+from gnuradio import filter
 from gnuradio import gr
 import sys
 import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
+from gnuradio.qtgui import Range, RangeWidget
+from PyQt5 import QtCore
 import PyQt5
 import osmosdr
 import time
@@ -77,6 +82,8 @@ class Metero(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.thresh2 = thresh2 = 50
+        self.thresh = thresh = 50
         self.samp_rate = samp_rate = 32000
         self.frequency_0 = frequency_0 = 100000000
 
@@ -84,6 +91,12 @@ class Metero(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
 
+        self._thresh2_range = Range(0, 500000000, 10, 50, 200)
+        self._thresh2_win = RangeWidget(self._thresh2_range, self.set_thresh2, "Low", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._thresh2_win)
+        self._thresh_range = Range(0, 500000000, 10, 50, 200)
+        self._thresh_win = RangeWidget(self._thresh_range, self.set_thresh, "Thresh", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._thresh_win)
         self.rtlsdr_source_0 = osmosdr.source(
             args="numchan=" + str(1) + " " + ""
         )
@@ -100,6 +113,11 @@ class Metero(gr.top_block, Qt.QWidget):
         self.rtlsdr_source_0.set_bb_gain(20, 0)
         self.rtlsdr_source_0.set_antenna('', 0)
         self.rtlsdr_source_0.set_bandwidth(100, 0)
+        self.rational_resampler_xxx_0 = filter.rational_resampler_fff(
+                interpolation=24,
+                decimation=250,
+                taps=[],
+                fractional_bw=0)
         self.qtgui_grbackground_0 = None
         if "default" != 'default':
             bkcolor="background-color: default;"
@@ -166,22 +184,37 @@ class Metero(gr.top_block, Qt.QWidget):
             lambda: self.set_frequency_0(eng_notation.str_to_num(str(self._frequency_0_line_edit.text()))))
         self.top_layout.addWidget(self._frequency_0_tool_bar)
         self.fft_vxx_0 = fft.fft_vcc(1024, True, window.blackmanharris(1024), True, 1)
+        self.blocks_wavfile_sink_0 = blocks.wavfile_sink(
+            'obs.wav',
+            1,
+            samp_rate,
+            blocks.FORMAT_WAV,
+            blocks.FORMAT_PCM_16,
+            False
+            )
         self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_float*1, 1024)
-        self.blocks_threshold_ff_0 = blocks.threshold_ff((-100), 100, 0)
+        self.blocks_threshold_ff_0 = blocks.threshold_ff((-thresh2), thresh, 0)
         self.blocks_stream_to_vector_0_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, 1024)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, 1024)
         self.blocks_float_to_short_0 = blocks.float_to_short(1, 1)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1024, 'C:\\Users\\HP\\Documents\\observations\\Observation.dat', True)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1024, 'C:\\Users\\HP\\Documents\\observations\\Observation.dat', False)
         self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_complex_to_mag_squared_0_0 = blocks.complex_to_mag_squared(1024)
         self.blocks_burst_tagger_0 = blocks.burst_tagger(gr.sizeof_gr_complex)
         self.blocks_burst_tagger_0.set_true_tag('burst',True)
-        self.blocks_burst_tagger_0.set_false_tag('burst',False)
+        self.blocks_burst_tagger_0.set_false_tag('no',False)
+        self.audio_sink_0 = audio.sink(samp_rate, '', True)
+        self.analog_wfm_rcv_0 = analog.wfm_rcv(
+        	quad_rate=250000,
+        	audio_decimation=1,
+        )
 
 
         ##################################################
         # Connections
         ##################################################
+        self.connect((self.analog_wfm_rcv_0, 0), (self.rational_resampler_xxx_0, 0))
+        self.connect((self.blocks_burst_tagger_0, 0), (self.analog_wfm_rcv_0, 0))
         self.connect((self.blocks_burst_tagger_0, 0), (self.blocks_stream_to_vector_0_0, 0))
         self.connect((self.blocks_complex_to_mag_squared_0_0, 0), (self.blocks_vector_to_stream_0, 0))
         self.connect((self.blocks_float_to_short_0, 0), (self.blocks_burst_tagger_0, 1))
@@ -190,6 +223,8 @@ class Metero(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_threshold_ff_0, 0), (self.blocks_float_to_short_0, 0))
         self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_threshold_ff_0, 0))
         self.connect((self.fft_vxx_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.rational_resampler_xxx_0, 0), (self.audio_sink_0, 0))
+        self.connect((self.rational_resampler_xxx_0, 0), (self.blocks_wavfile_sink_0, 0))
         self.connect((self.rtlsdr_source_0, 0), (self.blocks_burst_tagger_0, 0))
         self.connect((self.rtlsdr_source_0, 0), (self.blocks_stream_to_vector_0, 0))
         self.connect((self.rtlsdr_source_0, 0), (self.qtgui_freq_sink_x_0, 0))
@@ -202,6 +237,20 @@ class Metero(gr.top_block, Qt.QWidget):
         self.wait()
 
         event.accept()
+
+    def get_thresh2(self):
+        return self.thresh2
+
+    def set_thresh2(self, thresh2):
+        self.thresh2 = thresh2
+        self.blocks_threshold_ff_0.set_lo((-self.thresh2))
+
+    def get_thresh(self):
+        return self.thresh
+
+    def set_thresh(self, thresh):
+        self.thresh = thresh
+        self.blocks_threshold_ff_0.set_hi(self.thresh)
 
     def get_samp_rate(self):
         return self.samp_rate
